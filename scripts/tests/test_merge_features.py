@@ -44,6 +44,28 @@ class TestCookies(unittest.TestCase):
                 download.cookie_args(None, "/nonexistent/cookies.txt")
 
 
+class TestJsRuntime(unittest.TestCase):
+
+    def test_forced_none(self):
+        with mock.patch.dict(os.environ, dict(CLEAN_ENV, WATCH_JS_RUNTIME="none"), clear=True):
+            self.assertEqual(download.js_runtime_args(), [])
+
+    def test_forced_value(self):
+        with mock.patch.dict(os.environ, dict(CLEAN_ENV, WATCH_JS_RUNTIME="bun"), clear=True):
+            self.assertEqual(download.js_runtime_args(), ["--js-runtimes", "bun"])
+
+    def test_deno_is_default(self):
+        with mock.patch.dict(os.environ, CLEAN_ENV, clear=True), \
+                mock.patch.object(download.shutil, "which", side_effect=lambda n: "/x" if n == "deno" else None):
+            self.assertEqual(download.js_runtime_args(), [])
+
+    def test_node_when_no_deno(self):
+        with mock.patch.dict(os.environ, CLEAN_ENV, clear=True), \
+                mock.patch.object(download.shutil, "which", side_effect=lambda n: "/x" if n == "node" else None), \
+                mock.patch.object(download, "_ytdlp_supports", return_value=True):
+            self.assertEqual(download.js_runtime_args(), ["--js-runtimes", "node"])
+
+
 class TestPickSubtitle(unittest.TestCase):
 
     def _dir(self, names):

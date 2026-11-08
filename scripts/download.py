@@ -22,6 +22,11 @@ VIDEO_EXTS = {".mp4", ".mkv", ".webm", ".mov", ".m4v", ".avi", ".flv", ".wmv"}
 # French, ...), not only English. Override with $WATCH_SUB_LANGS.
 DEFAULT_SUB_LANGS = "en,en-US,en-GB,en-orig,.*-orig,ar,fr"
 
+# Best ≤720p with separate streams, then pre-muxed. The fallback skips DASH
+# entirely (used after a 403, typical for YouTube from cloud machines).
+PRIMARY_FORMAT = "bv*[height<=720]+ba/b[height<=720]/bv+ba/b"
+FALLBACK_FORMAT = "b[height<=720]/b"
+
 # Phrases yt-dlp prints when a source wants a logged-in session.
 LOGIN_HINTS = (
     "login required", "log in", "sign in", "cookies", "private video",
@@ -114,6 +119,42 @@ def _pick_video(out_dir: Path) -> Path | None:
     return None
 
 
+def js_runtime_args() -> list[str]:
+    """Pick a JavaScript runtime for yt-dlp's YouTube challenge solver.
+
+    YouTube now hides video formats behind a JS "n challenge". yt-dlp only
+    enables deno by default, so on machines with just node or bun every
+    YouTube download fails with "Requested format is not available".
+    $WATCH_JS_RUNTIME overrides the choice (e.g. "node"); "none" disables it.
+    """
+    forced = (os.environ.get("WATCH_JS_RUNTIME") or "").strip()
+    if forced.lower() == "none":
+        return []
+    if forced:
+        return ["--js-runtimes", forced]
+    if shutil.which("deno"):
+        return []  # yt-dlp's default
+    for runtime in ("node", "bun"):
+        if shutil.which(runtime) and _ytdlp_supports("--js-runtimes"):
+            return ["--js-runtimes", runtime]
+    return []
+
+
+_HELP_CACHE: str | None = None
+
+
+def _ytdlp_supports(flag: str) -> bool:
+    global _HELP_CACHE
+    if _HELP_CACHE is None:
+        try:
+            _HELP_CACHE = subprocess.run(
+                ["yt-dlp", "--help"], capture_output=True, text=True, timeout=30,
+            ).stdout
+        except (OSError, subprocess.SubprocessError):
+            _HELP_CACHE = ""
+    return flag in _HELP_CACHE
+
+
 def download_url(
     url: str,
     out_dir: Path,
@@ -127,10 +168,18 @@ def download_url(
     output_template = str(out_dir / "video.%(ext)s")
     cookies = cookie_args(cookies_from_browser, cookies_file)
 
-    cmd = [
-        "yt-dlp",
-        "-N", "8",
-        "-f", "bv*[height<=720]+ba/b[height<=720]/bv+ba/b",
+    def build_cmd(fmt: str) -> list[str]:
+        return [
+            "yt-dlp",
+            "-N", "8",
+            "-f", fmt,
+            *common,
+            "-o", output_template,
+            "--",
+            url,
+        ]
+
+    common = [
         "--merge-output-format", "mp4",
         "--write-info-json",
         "--write-subs",
@@ -141,19 +190,29 @@ def download_url(
         "--no-playlist",
         "--ignore-errors",
         *cookies,
-        "-o", output_template,
-        "--",
-        url,
+        *js_runtime_args(),
     ]
 
-    # yt-dlp may exit non-zero if a subtitle variant fails (e.g. 429) even when
-    # the video itself downloaded fine. Treat "video file present" as success.
-    # stderr is teed: shown live to the user and kept to detect login walls.
-    result = subprocess.run(cmd, stdout=sys.stderr, stderr=subprocess.PIPE, text=True)
-    if result.stderr:
-        sys.stderr.write(result.stderr)
-        sys.stderr.flush()
+    def run(fmt: str) -> subprocess.CompletedProcess:
+        # yt-dlp may exit non-zero if a subtitle variant fails (e.g. 429) even
+        # when the video itself downloaded fine. Treat "video file present" as
+        # success. stderr is teed: shown live and kept to detect login walls.
+        res = subprocess.run(build_cmd(fmt), stdout=sys.stderr, stderr=subprocess.PIPE, text=True)
+        if res.stderr:
+            sys.stderr.write(res.stderr)
+            sys.stderr.flush()
+        return res
+
+    result = run(PRIMARY_FORMAT)
     video = _pick_video(out_dir)
+    if video is None and "403" in (result.stderr or ""):
+        # From data-center IPs YouTube often 403s the separate DASH streams
+        # but still serves the pre-muxed (HLS) ones. Retry with those.
+        print("[watch] stream download got 403 — retrying with a pre-muxed format…", file=sys.stderr)
+        for leftover in out_dir.glob("video.*.part"):
+            leftover.unlink(missing_ok=True)
+        result = run(FALLBACK_FORMAT)
+        video = _pick_video(out_dir)
     if video is None:
         msg = f"yt-dlp did not produce a video file in {out_dir} (exit {result.returncode})"
         err = (result.stderr or "").lower()

@@ -219,7 +219,7 @@ def _install_hint_linux(missing: list[str]) -> str:
     if "ffmpeg" in pkgs:
         hints.append("apt: `sudo apt install ffmpeg` or dnf: `sudo dnf install ffmpeg`")
     if "yt-dlp" in pkgs:
-        hints.append("`pipx install yt-dlp` (recommended) or `pip install --user yt-dlp`")
+        hints.append("`pipx install 'yt-dlp[default]'` (recommended) or `pip install --user -U 'yt-dlp[default]'`")
     return "\n  ".join(hints) if hints else "nothing to install"
 
 

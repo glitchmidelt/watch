@@ -1,6 +1,6 @@
 {
   "name": "watch",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Let Claude watch a video from YouTube, TikTok, Instagram, X and more. Scene-change frames, a dense 0-10s hook microscope, captions or Whisper (API or fully local, no key), browser cookies for login-gated sources, a structured report.md and optional Obsidian auto-save.",
   "author": {
     "name": "Abdlali Hammoujane"

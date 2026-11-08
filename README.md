@@ -103,6 +103,7 @@ Tips:
 | `WATCH_WHISPER` | `local` | Force a backend |
 | `WATCH_WHISPER_MODEL` | `medium` | Local model (tiny / base / small / medium / large-v3) |
 | `WATCH_WHISPER_LANGUAGE` | `ar` | Language hint for local Whisper (auto-detected if unset) |
+| `WATCH_JS_RUNTIME` | `node` | JS runtime for YouTube's challenge solver (auto: deno, else node/bun; `none` to disable) |
 | `WATCH_SUB_LANGS` | `en,ar,fr` | Subtitle languages to request from yt-dlp |
 | `WATCH_VAULT_DIR` | `~/Obsidian` | Obsidian vault for auto-save |
 
@@ -115,6 +116,16 @@ These variables can also go in `~/.config/watch/.env`, except `WATCH_VAULT_DIR`,
 3. The first 10 seconds get a dense pass: 2 fps plus word-level timestamps.
 4. The transcript comes from the captions. If there are none, Whisper (API or local) transcribes the audio.
 5. The script prints the frame paths with timestamps and writes `report.md`. Claude `Read`s every frame, answers you, and fills in the report.
+
+## YouTube from a server / cloud machine
+
+YouTube blocks data-center IPs with *"Sign in to confirm you're not a bot"*. What makes it work:
+
+1. Install yt-dlp with its challenge solver: `pip install -U "yt-dlp[default]"`. You also need a JS runtime: deno, node or bun. `/watch` picks node or bun automatically when deno is missing.
+2. Pass YouTube cookies: `--cookies cookies.txt`. Export **only youtube.com** cookies from a **secondary** Google account, not your main one.
+3. If the separate video/audio streams return 403, `/watch` retries automatically with a pre-muxed format.
+
+On a home computer none of this is needed.
 
 ## Limits
 

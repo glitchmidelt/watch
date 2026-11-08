@@ -2,6 +2,15 @@
 
 All notable changes to `/watch` are documented here.
 
+## [1.1.0] — 2026-11-08
+
+### Fixed
+- YouTube from cloud / server machines. When deno is missing, yt-dlp now uses node or bun for YouTube's JS challenge (before, it failed with "Requested format is not available"). Set `WATCH_JS_RUNTIME` to override.
+- A 403 on the separate DASH streams now triggers one automatic retry with a pre-muxed format.
+
+### Changed
+- Setup recommends `yt-dlp[default]`, which bundles the challenge solver.
+
 ## [1.0.0] — 2026-11-08
 
 Merge of [taoufik123-collab/claude-watch](https://github.com/taoufik123-collab/claude-watch) v0.2.0 (base) and [mathiaschu/watch](https://github.com/mathiaschu/watch) v1.0.0.
