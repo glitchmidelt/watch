@@ -3,8 +3,8 @@ name: watch
 description: Watch a video (URL or local path) like an editor. Extracts scene-change frames, pacing metrics (cuts/min, shot length), and a dense 0-10s hook microscope; pulls transcript from captions (in the video's own language) or Whisper (Groq/OpenAI API, or fully local with no key). Handles login-gated sources (Instagram, X, private) with the user's own browser cookies. Produces an ingest-ready `report.md` and, after answering the user, optionally auto-ingests the analysis into your Obsidian vault (configurable via `$WATCH_VAULT_DIR`) — tied to *why* the user watched it.
 argument-hint: "<video-url-or-path> [why you're watching it]"
 allowed-tools: Bash, Read, AskUserQuestion
-homepage: https://github.com/YOUR_GITHUB_USER/watch
-repository: https://github.com/YOUR_GITHUB_USER/watch
+homepage: https://github.com/glitchmidelt/watch
+repository: https://github.com/glitchmidelt/watch
 author: Abdlali Hammoujane
 license: MIT
 user-invocable: true

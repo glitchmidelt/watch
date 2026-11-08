@@ -34,13 +34,13 @@ This project merges two forks of [bradautomates/claude-video](https://github.com
 
 **Claude Code (plugin):**
 ```
-/plugin marketplace add YOUR_GITHUB_USER/watch
+/plugin marketplace add glitchmidelt/watch
 /plugin install watch@watch
 ```
 
 **Manual (Claude Code / Codex skill folder):**
 ```bash
-git clone https://github.com/YOUR_GITHUB_USER/watch.git ~/.claude/skills/watch
+git clone https://github.com/glitchmidelt/watch.git ~/.claude/skills/watch
 ```
 
 **claude.ai (web):** run `bash scripts/build-skill.sh`, then upload `dist/watch.skill` in Settings → Capabilities → Skills. Turn on "Code execution and file creation" first.

@@ -5,8 +5,8 @@
   "author": {
     "name": "Abdlali Hammoujane"
   },
-  "homepage": "https://github.com/YOUR_GITHUB_USER/watch",
-  "repository": "https://github.com/YOUR_GITHUB_USER/watch",
+  "homepage": "https://github.com/glitchmidelt/watch",
+  "repository": "https://github.com/glitchmidelt/watch",
   "license": "MIT",
   "keywords": ["video", "watch", "youtube", "tiktok", "instagram", "x", "vimeo", "transcription", "whisper", "local-whisper", "cookies", "yt-dlp", "ffmpeg", "multimodal", "frames", "obsidian", "hook-microscope"]
 }
