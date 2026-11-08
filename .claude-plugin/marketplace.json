@@ -1,0 +1,21 @@
+{
+  "name": "watch",
+  "metadata": {
+    "description": "Give Claude a video input. /watch downloads (with cookies for Instagram/X), extracts scene-change frames, microscopes the 0-10s hook, transcribes via captions or Whisper (API or fully local), and emits a structured report."
+  },
+  "owner": {
+    "name": "Abdlali Hammoujane"
+  },
+  "plugins": [
+    {
+      "name": "watch",
+      "description": "Watch a video (URL or local path): YouTube, TikTok, Instagram, X, Vimeo, Loom and more. Scene-change frames, 0-10s hook microscope, captions in the video's own language, Whisper via Groq/OpenAI or on-device (mlx-whisper / openai-whisper), browser cookies for login-gated sources, structured report.md, optional Obsidian auto-save.",
+      "author": {
+        "name": "Abdlali Hammoujane"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/YOUR_GITHUB_USER/watch"
+    }
+  ]
+}

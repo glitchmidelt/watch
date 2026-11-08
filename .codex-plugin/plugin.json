@@ -1,0 +1,8 @@
+{
+  "name": "watch",
+  "version": "1.0.0",
+  "description": "Let Claude (or Codex) watch a video: scene-change frames, transcript (captions, Whisper API, or fully local), a 0-10s hook microscope, browser cookies for Instagram/X, a structured report and optional Obsidian auto-save.",
+  "repository": "https://github.com/YOUR_GITHUB_USER/watch",
+  "author": "Abdlali Hammoujane",
+  "license": "MIT"
+}
