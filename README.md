@@ -43,7 +43,7 @@ This project merges two forks of [bradautomates/claude-video](https://github.com
 git clone https://github.com/glitchmidelt/watch.git ~/.claude/skills/watch
 ```
 
-**claude.ai (web):** run `bash scripts/build-skill.sh`, then upload `dist/watch.skill` in Settings → Capabilities → Skills. Turn on "Code execution and file creation" first.
+**claude.ai (web):** download `watch.skill` from the [latest release](https://github.com/glitchmidelt/watch/releases/latest) and upload it in Settings → Capabilities → Skills. Turn on "Code execution and file creation" first.
 
 Then run this once:
 ```bash

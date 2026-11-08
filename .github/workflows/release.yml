@@ -1,9 +1,16 @@
 name: Release
 
+# Releases happen when:
+#  - the version in .claude-plugin/plugin.json changes on main (no tag needed;
+#    the workflow creates tag v<version> itself), or
+#  - a v* tag is pushed, or
+#  - it is started by hand from the Actions tab.
 on:
   push:
-    tags:
-      - "v*"
+    branches: [main]
+    paths: [".claude-plugin/plugin.json", ".github/workflows/release.yml"]
+    tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,14 +24,40 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            TAG="v$(python3 -c 'import json; print(json.load(open(".claude-plugin/plugin.json"))["version"])')"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release $TAG already exists, nothing to do."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Run tests
+        if: steps.version.outputs.exists == 'false'
+        run: python3 -m unittest discover -s scripts/tests -t scripts
+
       - name: Build .skill artifact
+        if: steps.version.outputs.exists == 'false'
         run: |
           bash scripts/build-skill.sh
           test -f dist/watch.skill
 
       - name: Create GitHub release
+        if: steps.version.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           files: dist/watch.skill
           generate_release_notes: true
           draft: false
